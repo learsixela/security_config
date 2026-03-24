@@ -1,4 +1,4 @@
-package com.skillnest.web.services;
+package com.seguridad.web.services;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,9 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.skillnest.web.Dto.UserDto;
-import com.skillnest.web.models.Usuario;
-import com.skillnest.web.repositories.UsuarioRepository;
+import com.seguridad.web.Dto.UserDto;
+import com.seguridad.web.models.Usuario;
+import com.seguridad.web.repositories.UsuarioRepository;
 
 @Service
 public class UsuarioServiceImpl implements UserDetailsService, UserService {

@@ -1,4 +1,4 @@
-package com.skillnest.web;
+package com.seguridad.web;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

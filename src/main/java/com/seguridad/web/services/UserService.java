@@ -1,9 +1,9 @@
-package com.skillnest.web.services;
+package com.seguridad.web.services;
 
 import java.util.List;
 
-import com.skillnest.web.Dto.UserDto;
-import com.skillnest.web.models.Usuario;
+import com.seguridad.web.Dto.UserDto;
+import com.seguridad.web.models.Usuario;
 
 public interface UserService {
     void saveUser(UserDto userDto);

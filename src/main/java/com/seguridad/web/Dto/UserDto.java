@@ -1,4 +1,4 @@
-package com.skillnest.web.Dto;
+package com.seguridad.web.Dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

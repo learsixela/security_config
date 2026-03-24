@@ -1,4 +1,4 @@
-package com.skillnest.web.controllers;
+package com.seguridad.web.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.skillnest.web.Dto.UserDto;
-import com.skillnest.web.models.Usuario;
-import com.skillnest.web.services.UsuarioServiceImpl;
+import com.seguridad.web.Dto.UserDto;
+import com.seguridad.web.models.Usuario;
+import com.seguridad.web.services.UsuarioServiceImpl;
 
 import jakarta.validation.Valid;
 

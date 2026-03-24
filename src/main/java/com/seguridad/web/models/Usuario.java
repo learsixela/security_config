@@ -1,4 +1,4 @@
-package com.skillnest.web.models;
+package com.seguridad.web.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

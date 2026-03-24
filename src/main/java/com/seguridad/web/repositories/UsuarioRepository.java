@@ -1,10 +1,10 @@
-package com.skillnest.web.repositories;
+package com.seguridad.web.repositories;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.skillnest.web.models.Usuario;
+import com.seguridad.web.models.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByUsername(String username);

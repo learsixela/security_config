@@ -1,4 +1,4 @@
-package com.skillnest.web.security;
+package com.seguridad.web.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
