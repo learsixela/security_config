@@ -27,28 +27,46 @@ public class UsuarioServiceImpl implements UserDetailsService, UserService {
     @Autowired
     private UsuarioRepository usuarioRepo;
 
+    /**
+     * Implementación de UserDetailsService
+     * Busca por email (no por username) porque SecurityConfig usa .usernameParameter("email")
+     * @param email Email del usuario (recibido como parámetro "email" del formulario)
+     * @return UserDetails para la autenticación
+     */
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        Usuario usuario = usuarioRepo.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("No encontrado"));
+    public UserDetails loadUserByUsername(String email) {
+        Usuario usuario = usuarioRepo.findByEmail(email)
+    			.orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
         return User.builder()
-            .username(usuario.getUsername())
+            .username(usuario.getEmail())      // Usar email como username en UserDetails
             .password(usuario.getPassword())
             .roles(usuario.getRole())
             .build();
     }
 
+
+    @Override
+    public Usuario getUserByUsername(String username) {
+        return usuarioRepo.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+    }
+
 	@Override
-	public void saveUser(UserDto userDto) {
-        Usuario usuario = new Usuario();
+	public Usuario saveUser(UserDto userDto) {
+		 Usuario usuario = new Usuario();
+		List<Usuario> usuarios = usuarioRepo.findAll();
+		if (usuarios.isEmpty()) {
+			usuario.setRole("ADMIN");//(userDto.getRole());
+		}else {
+			usuario.setRole("USER");
+		}
         usuario.setUsername(userDto.getUsername());
-        usuario.setRole(userDto.getRole());
         usuario.setEmail(userDto.getEmail());
         // encriptar password usando spring security bcrypt
         usuario.setPassword(passwordEncoder.encode(userDto.getPassword()));
         
-        usuarioRepo.save(usuario);
+        return usuarioRepo.save(usuario);
 		
 	}
 

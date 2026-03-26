@@ -1,0 +1,243 @@
+// GUÍA RÁPIDA - Comandos CURL para pruebas API JWT
+
+// ========================================
+// 1. TEST DE CONEXIÓN BÁSICA
+// ========================================
+GET /api/auth/test
+Response: {"message":"API REST funcionando correctamente","timestamp":"..."}
+
+curl -X GET http://localhost:8082/api/auth/test
+
+
+// ========================================
+// 2. LOGIN - Obtener JWT Token
+// ========================================
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+curl -X POST http://localhost:8082/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+
+Response:
+{
+  "message": "Login exitoso",
+  "token": "eyJhbGciOiJIUzUxMiJ9...",
+  "refreshToken": "eyJhbGciOiJIUzUxMiJ9...",
+  "user": {
+    "username": "admin",
+    "email": "admin@example.com",
+    "role": "ADMIN"
+  }
+}
+
+
+// ========================================
+// 3. REGISTRO - Crear nuevo usuario
+// ========================================
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "password123",
+  "role": "USER"
+}
+
+curl -X POST http://localhost:8082/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username":"newuser",
+    "email":"newuser@example.com",
+    "password":"password123",
+    "role":"USER"
+  }'
+
+
+// ========================================
+// 4. OBTENER USUARIO ACTUAL (Autenticado)
+// ========================================
+GET /api/auth/me
+Authorization: Bearer <JWT_TOKEN>
+
+curl -X GET http://localhost:8082/api/auth/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9..." \
+  -H "Content-Type: application/json"
+
+Response:
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "role": "ADMIN"
+}
+
+
+// ========================================
+// 5. LISTAR TODOS LOS USUARIOS (ADMIN)
+// ========================================
+GET /api/auth/users
+Authorization: Bearer <ADMIN_JWT_TOKEN>
+
+curl -X GET http://localhost:8082/api/auth/users \
+  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9..." \
+  -H "Content-Type: application/json"
+
+Response:
+[
+  {
+    "username": "admin",
+    "email": "admin@example.com",
+    "role": "ADMIN"
+  },
+  {
+    "username": "user",
+    "email": "user@example.com",
+    "role": "USER"
+  }
+]
+
+
+// ========================================
+// 6. RENOVAR TOKEN (Refresh Token)
+// ========================================
+POST /api/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "<REFRESH_TOKEN>"
+}
+
+curl -X POST http://localhost:8082/api/auth/refresh-token \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"eyJhbGciOiJIUzUxMiJ9..."}'
+
+Response:
+{
+  "message": "Token renovado exitosamente",
+  "token": "eyJhbGciOiJIUzUxMiJ9..."
+}
+
+
+// ========================================
+// 7. OBTENER USUARIO POR ID (ADMIN)
+// ========================================
+GET /api/auth/users/{userId}
+Authorization: Bearer <ADMIN_JWT_TOKEN>
+
+curl -X GET http://localhost:8082/api/auth/users/1 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9..." \
+  -H "Content-Type: application/json"
+
+
+// ========================================
+// FLUJO COMPLETO DE PRUEBA (Bash)
+// ========================================
+
+#!/bin/bash
+
+# 1. Login y obtener token
+echo "Ejecutando login..."
+LOGIN=$(curl -s -X POST http://localhost:8082/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}')
+
+TOKEN=$(echo $LOGIN | jq -r '.token')
+REFRESH=$(echo $LOGIN | jq -r '.refreshToken')
+
+echo "Token: $TOKEN"
+
+# 2. Usar token en solicitud protegida
+echo "Obteniendo usuario actual..."
+curl -s -X GET http://localhost:8082/api/auth/me \
+  -H "Authorization: Bearer $TOKEN" | jq '.'
+
+# 3. Listar usuarios
+echo "Listando usuarios..."
+curl -s -X GET http://localhost:8082/api/auth/users \
+  -H "Authorization: Bearer $TOKEN" | jq '.'
+
+# 4. Renovar token
+echo "Renovando token..."
+curl -s -X POST http://localhost:8082/api/auth/refresh-token \
+  -H "Content-Type: application/json" \
+  -d "{\"refreshToken\":\"$REFRESH\"}" | jq '.'
+
+
+// ========================================
+// CÓDIGOS DE ERROR COMUNES
+// ========================================
+
+400 Bad Request
+=> Validación fallida (campos requeridos, formato incorrecto)
+=> Revisar el JSON enviado
+
+401 Unauthorized
+=> Token ausente, inválido o expirado
+=> Incluir header: Authorization: Bearer <token>
+=> Obtener nuevo token si expiró
+
+403 Forbidden
+=> Usuario sin permisos suficientes
+=> Verificar roles requeridos para el endpoint
+
+404 Not Found
+=> Endpoint no existe
+=> Revisar URL y método HTTP
+
+500 Internal Server Error
+=> Error del servidor
+=> Revisar logs de la aplicación
+
+
+// ========================================
+// ESTRUCTURA DEL JWT TOKEN
+// ========================================
+
+Un JWT tiene 3 partes separadas por puntos (.):
+
+eyJhbGciOiJIUzUxMiJ9           <-- HEADER (algoritmo)
+.
+eyJzdWIiOiJhZG1pbiIsInJvbGVzIjog... <-- PAYLOAD (datos)
+.
+d7dBrK8J9K7d9sK8L9L0M9...      <-- SIGNATURE (firma)
+
+HEADER: {"alg":"HS512"}
+PAYLOAD: {"sub":"admin","roles":"[ROLE_ADMIN]","iat":1700000000,"exp":1700086400}
+SIGNATURE: Generada con la clave secreta
+
+Para decodificar, visitar: https://jwt.io/
+
+
+// ========================================
+// PROPIEDADES JWT EN application.properties
+// ========================================
+
+# Clave para firmar tokens (cambiar en producción)
+app.jwt.secret=mySecretKeyForJwtTokenGenerationAndValidationPurposesOnly123456789
+
+# Expiración de JWT (24 horas = 86400000 ms)
+app.jwt.expiration=86400000
+
+# Expiración de Refresh Token (7 días = 604800000 ms)
+app.jwt.refresh-expiration=604800000
+
+
+// ========================================
+// NOTAS IMPORTANTES
+// ========================================
+
+✓ Los tokens JWT son válidos por 24 horas
+✓ Los refresh tokens son válidos por 7 días
+✓ Incluir siempre el header: Authorization: Bearer <token>
+✓ No incluir espacios extra en el formato Bearer
+✓ Para producción, cambiar app.jwt.secret por algo más seguro
+✓ Usar HTTPS en producción
+✓ Guardar tokens en localStorage/sessionStorage (no en cookies inseguras)
+✓ Implementar logout limpiando el token del cliente
+✓ Renovar el JWT antes de que expire usando el refresh token
